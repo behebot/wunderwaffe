@@ -45,13 +45,31 @@ do
 			DEVICE=$OPTARG
 		;;
 		l)
-			LOSS=$OPTARG
+			if [[ $OPTARG =~ ^[0-9]{1,3}$ ]]
+				then
+					LOSS=$OPTARG
+				else
+					echo "Wrong format of loss (-l) option value."
+					exit $E_WRONG_PARAM
+			fi
 		;;
 		t)
-			TIMINGS=$OPTARG
+			if [[ $OPTARG =~ ^[0-9]{1,4},[0-9]{1,4},[0-9]{1,3}$ ]]
+				then
+					TIMINGS=$OPTARG
+				else
+					echo "Wrong format of timings (-t) option value."
+					exit $E_WRONG_PARAM
+			fi
 		;;
 		p)
-			PERCENTAGE=$OPTARG
+			if [[ $OPTARG =~ ^[0-9]{1,3}$ ]]
+				then
+					PERCENTAGE=$OPTARG
+				else
+					echo "Wrong format of percentage (-p) option value."
+					exit $E_WRONG_PARAM
+			fi
 		;;
 		a)
 			ADDRESS=$OPTARG
