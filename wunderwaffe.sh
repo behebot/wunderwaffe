@@ -136,9 +136,18 @@ $DEBUG tc qdisc del dev $DEVICE root
 $DEBUG iptables -t mangle -I OUTPUT -d $ADDRESS -m statistic --mode random --probability $PERCENTAGE -j MARK --set-mark 0x1
 
 # tc next
-$DEBUG tc qdisc add dev $DEVICE root handle 1: prio
-$DEBUG tc qdisc add dev $DEVICE parent 1:1 handle 10: netem delay ${DELAY}ms ${JITTER}ms ${CORRELATION}% loss ${LOSS}%
-$DEBUG tc filter add dev $DEVICE protocol ip parent 1:0 prio 3 handle 1 fw flowid 10:1
+# Add root qdisc
+$DEBUG tc qdisc add dev $DEVICE root handle 1: htb default 10
+$DEBUG tc class add dev $DEVICE parent 1: classid 1:1 htb rate 2000Mbit
+
+# Add class and qdisc for all traffic
+$DEBUG tc class add dev $DEVICE parent 1:1 classid 1:10 htb rate 1000Mbit
+$DEBUG tc qdisc add dev $DEVICE parent 1:10 handle 10: sfq perturb 10
+
+# Add class and qdisc special for shaped traffic
+$DEBUG tc class add dev $DEVICE parent 1:1 classid 1:20 htb rate 1000MBit
+$DEBUG tc qdisc add dev $DEVICE parent 1:20 handle 20: netem delay ${DELAY}ms ${JITTER}ms ${CORRELATION}% loss ${LOSS}%
+$DEBUG tc filter add dev $DEVICE protocol ip parent 1:0 prio 3 handle 1 fw classid 1:20
 
 $DEBUG echo Device: $DEVICE
 $DEBUG echo Loss: $LOSS
